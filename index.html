@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI美甲效果生成器 | 奈之何科技</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定义动画 */
+        @keyframes pulse-border {
+            0%, 100% { border-color: #6366f1; }
+            50% { border-color: #a5b4fc; }
+        }
+        .upload-area {
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.1);
+        }
+        .upload-area.dragover {
+            animation: pulse-border 1.5s infinite;
+            background-color: #f5f3ff;
+        }
+        .loading-spinner {
+            border: 3px solid #e0e7ff;
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- 头部 -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-indigo-600">AI美甲效果生成器</h1>
+            <span class="text-sm text-gray-500">奈之何科技出品</span>
+        </div>
+    </header>
+
+    <!-- 主体内容 -->
+    <main class="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- 左侧：上传与输入区 -->
+            <div class="space-y-6">
+                <!-- 图片上传区 -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">1. 上传素材图片</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- 人物图片上传 -->
+                        <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-indigo-500" id="personUpload">
+                            <input type="file" id="personImage" class="hidden" accept="image/*">
+                            <label for="personImage" class="cursor-pointer">
+                                <div id="personPreview" class="space-y-2">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <p class="text-sm text-gray-500">上传人物图片</p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- 美甲图片上传 -->
+                        <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-indigo-500" id="nailUpload">
+                            <input type="file" id="nailImage" class="hidden" accept="image/*">
+                            <label for="nailImage" class="cursor-pointer">
+                                <div id="nailPreview" class="space-y-2">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <p class="text-sm text-gray-500">上传美甲图片</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 提示词输入区 -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">2. 输入生成提示词</h2>
+                    <textarea id="promptInput" rows="8" class="w-full border border-gray-300 rounded-lg p-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="请输入生成提示词...">结合上传的人物和美甲图片，生成两张不同角度照片。这张照片采用第一人称的低角度仰拍结合超广角拍摄，将人物的手部作为前景进行特写，以指甲为焦点聚焦不要模糊，人物看向镜头，人物略微失焦手的姿势严格按虎口面对镜头，拇指和食指伸直，其余手指自然弯曲的姿势。以平视偏下的机位强化了手指主体画面，同时借助仰拍视角让人物的伸手姿势更具张力，广角效果也让背景和人物肢体动作的空间感更突出。比例3:4。不要超出屏幕。</textarea>
+                </div>
+
+                <!-- 生成按钮 -->
+                <button id="generateBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <span>开始生成</span>
+                </button>
+            </div>
+
+            <!-- 右侧：结果展示区 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">生成结果</h2>
+                <div id="resultArea" class="border-2 border-dashed border-gray-200 rounded-lg min-h-[500px] flex items-center justify-center text-gray-400">
+                    <div class="text-center">
+                        <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p class="mt-2">生成的图片将在这里显示</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚版权 -->
+    <footer class="bg-gray-800 text-white py-4">
+        <div class="max-w-6xl mx-auto px-4 text-center text-sm">
+            <p>© 2026 奈之何科技 版权所有 | AI美甲效果生成器</p>
+        </div>
+    </footer>
+
+    <script>
+        // 图片上传预览功能
+        function setupImageUpload(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        preview.innerHTML = `<img src="${event.target.result}" class="w-full h-40 object-cover rounded-lg" alt="预览图片">`;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // 拖拽上传支持
+            const uploadArea = input.closest('.upload-area');
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    input.files = e.dataTransfer.files;
+                    input.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        // 初始化上传预览
+        setupImageUpload('personImage', 'personPreview');
+        setupImageUpload('nailImage', 'nailPreview');
+
+        // 生成按钮交互
+        const generateBtn = document.getElementById('generateBtn');
+        const resultArea = document.getElementById('resultArea');
+        const promptInput = document.getElementById('promptInput');
+
+        generateBtn.addEventListener('click', async function() {
+            const personFile = document.getElementById('personImage').files[0];
+            const nailFile = document.getElementById('nailImage').files[0];
+            const prompt = promptInput.value.trim();
+
+            // 基础校验
+            if (!personFile || !nailFile) {
+                alert('请上传人物图片和美甲图片');
+                return;
+            }
+            if (!prompt) {
+                alert('请输入生成提示词');
+                return;
+            }
+
+            // 显示加载状态
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = `<div class="loading-spinner"></div><span>生成中...</span>`;
+            resultArea.innerHTML = `<div class="text-center text-gray-500">正在生成您的美甲效果图片，请稍候...</div>`;
+
+            // 模拟生成过程（实际使用时替换为真实API调用）
+            setTimeout(() => {
+                // 这里可以接入AI生成API，以下为模拟结果
+                resultArea.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4 w-full p-4">
+                        <div class="aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">生成的图片1</div>
+                        <div class="aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">生成的图片2</div>
+                    </div>
+                `;
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = `<span>重新生成</span>`;
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
